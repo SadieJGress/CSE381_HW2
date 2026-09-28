@@ -28,8 +28,13 @@ ALavaHuangGressCharacter::ALavaHuangGressCharacter()
 
 	// Note: For faster iteration times these variables, and many more, can be tweaked in the Character Blueprint
 	// instead of recompiling to adjust them
-	GetCharacterMovement()->JumpZVelocity = 500.f;
-	GetCharacterMovement()->AirControl = 0.35f;
+
+	// Increasing jump amount to two
+	// Also gonna increase air control to .4
+	// Okay had to do some voodoo and reset the ThirdPersonCharacter from being connected to ACharacter into being parented by this file
+	JumpMaxCount = 2;
+	GetCharacterMovement()->JumpZVelocity = 600.f;
+	GetCharacterMovement()->AirControl = 0.4f;
 	GetCharacterMovement()->MaxWalkSpeed = 500.f;
 	GetCharacterMovement()->MinAnalogWalkSpeed = 20.f;
 	GetCharacterMovement()->BrakingDecelerationWalking = 2000.f;
@@ -120,6 +125,22 @@ void ALavaHuangGressCharacter::DoLook(float Yaw, float Pitch)
 	}
 }
 
+void ALavaHuangGressCharacter::Jump()
+{
+	// Check if character is in air 
+	if (GetVelocity().Z != 0 || GetCharacterMovement()->IsFalling())
+	{
+		// Play animation
+		if (DoubleJumpMontage)
+		{
+			PlayAnimMontage(DoubleJumpMontage);
+		}
+	}
+
+	// Call original Jump function
+	Super::Jump();
+}
+
 void ALavaHuangGressCharacter::DoJumpStart()
 {
 	// signal the character to jump
@@ -131,3 +152,5 @@ void ALavaHuangGressCharacter::DoJumpEnd()
 	// signal the character to stop jumping
 	StopJumping();
 }
+
+
