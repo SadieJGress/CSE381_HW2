@@ -92,5 +92,16 @@ public:
 
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+
+// For double jumping animation
+public:
+	virtual void Jump() override;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+	UAnimMontage* DoubleJumpMontage;
+
+
 };
+
+
 
