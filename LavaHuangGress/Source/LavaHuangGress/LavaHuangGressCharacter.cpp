@@ -11,6 +11,18 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "LavaHuangGress.h"
+#include "DrawDebugHelpers.h"
+#include "Lava.h"
+#include "Kismet/GameplayStatics.h"
+
+#define PRINT_LOG(Format, ...) \
+    do { \
+        FString _msg = FString::Printf(TEXT(Format), ##__VA_ARGS__); \
+        UE_LOG(LogTemp, Warning, TEXT("%s"), *_msg); \
+        if (GEngine) { \
+            GEngine->AddOnScreenDebugMessage(-1, 4.0f, FColor::Red, _msg); \
+        } \
+    } while(0)
 
 ALavaHuangGressCharacter::ALavaHuangGressCharacter()
 {
@@ -153,4 +165,74 @@ void ALavaHuangGressCharacter::DoJumpEnd()
 	StopJumping();
 }
 
+void ALavaHuangGressCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
+	// Store spawn point as default safe respawn
+	LastSafeLocation = GetActorLocation();
+	LastSafeRotation = GetActorRotation();
+}
+
+void ALavaHuangGressCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	// Need to update surface now
+	UpdateSafeSurface();
+}
+
+void ALavaHuangGressCharacter::UpdateSafeSurface()
+{
+	if (GetCharacterMovement() && GetCharacterMovement()->IsMovingOnGround())
+	{
+		FHitResult HitResult = GetCharacterMovement()->CurrentFloor.HitResult;
+
+		if (HitResult.bBlockingHit && HitResult.GetActor() && !HitResult.GetActor()->IsA(ALava::StaticClass()))
+		{
+			ALava* LavaActor = Cast<ALava>(UGameplayStatics::GetActorOfClass(this, ALava::StaticClass()));
+			float LavaZ = LavaActor ? LavaActor->GetActorLocation().Z : -99999.f;
+
+			if (GetActorLocation().Z > LavaZ + 100.f)
+			{
+				LastSafeLocation = GetActorLocation();
+				LastSafeRotation = GetActorRotation();
+
+				// Debug
+				PRINT_LOG("Updated Safe Surface: %s", *LastSafeLocation.ToString());
+			}
+		}
+	}
+}
+
+void ALavaHuangGressCharacter::RespawnAtSurface()
+{
+	if (GetCharacterMovement())
+	{
+		GetCharacterMovement()->StopMovementImmediately();
+		GetCharacterMovement()->Velocity = FVector::ZeroVector;
+	}
+
+	FVector TargetRespawn = LastSafeLocation;
+	ALava* LavaActor = Cast<ALava>(UGameplayStatics::GetActorOfClass(this, ALava::StaticClass()));
+
+	if (LavaActor)
+	{
+		float CurrentLavaZ = LavaActor->GetActorLocation().Z;
+		float SafetyBuffer = 150.f;
+
+		if (TargetRespawn.Z <= CurrentLavaZ + SafetyBuffer)
+		{
+			TargetRespawn.Z = CurrentLavaZ + SafetyBuffer;
+
+			// Debug
+			PRINT_LOG("Safe surface under lava");
+		}
+	}
+
+	// Debug 
+	PRINT_LOG("Respawning: %s", *TargetRespawn.ToString());
+
+	SetActorLocationAndRotation(TargetRespawn, LastSafeRotation, false, nullptr, ETeleportType::ResetPhysics);
+}
 
