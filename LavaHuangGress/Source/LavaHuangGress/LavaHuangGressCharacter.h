@@ -61,11 +61,22 @@ protected:
 
 protected:
 
+	// Check last walkable surface
+	void UpdateSafeSurface();
+
 	/** Called for movement input */
 	void Move(const FInputActionValue& Value);
 
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
+
+protected:
+	// Override begin play
+	virtual void BeginPlay() override;
+
+public:
+	// Override tick function
+	virtual void Tick(float DeltaTime) override;
 
 public:
 
@@ -100,8 +111,18 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
 	UAnimMontage* DoubleJumpMontage;
 
+public:
 
+	// try to reset to last recorded positionW
+	UFUNCTION(BlueprintCallable, Category = "Gameplay")
+	void RespawnAtSurface();
+
+private:
+	// Coordinates for respawning. Vector and rotation 
+	FVector LastSafeLocation;
+	FRotator LastSafeRotation;
 };
+
 
 
 
