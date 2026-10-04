@@ -7,6 +7,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/Controller.h"
+#include "GameFramework/PlayerController.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
@@ -14,6 +15,7 @@
 #include "DrawDebugHelpers.h"
 #include "Lava.h"
 #include "Kismet/GameplayStatics.h"
+#include "Camera/PlayerCameraManager.h"
 
 #define PRINT_LOG(Format, ...) \
     do { \
@@ -137,6 +139,50 @@ void ALavaHuangGressCharacter::DoLook(float Yaw, float Pitch)
 	}
 }
 
+void ALavaHuangGressCharacter::LavaHurt()
+{
+	APlayerController* PC = Cast<APlayerController>(GetController());
+
+	// Freeze character
+	GetCharacterMovement()->StopMovementImmediately();
+	GetCharacterMovement()->SetMovementMode(MOVE_None);
+	GetMesh()->bPauseAnims = true;
+
+
+	// Reset after a second
+	GetWorldTimerManager().SetTimer(
+		HurtTimer,
+		this,
+		&ALavaHuangGressCharacter::ResetMovement,
+		StunDuration,
+		false
+	);
+
+	// Red camera effect
+	if (PC && PC->PlayerCameraManager)
+	{
+		PC->PlayerCameraManager->StartCameraFade(
+			0.8f, // Starting opacity
+			0.0f, // End opacity
+			0.5f, // Length
+			FLinearColor::Red, // Color
+			false,
+			false
+		);
+	}
+}
+
+void ALavaHuangGressCharacter::ResetMovement()
+{
+	// Unpause character and respawn
+	GetMesh()->bPauseAnims = false;
+
+	RespawnAtSurface();
+
+	GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+}
+
+
 void ALavaHuangGressCharacter::Jump()
 {
 	// Check if character is in air 
@@ -198,8 +244,6 @@ void ALavaHuangGressCharacter::UpdateSafeSurface()
 				LastSafeLocation = GetActorLocation();
 				LastSafeRotation = GetActorRotation();
 
-				// Debug
-				PRINT_LOG("Updated Safe Surface: %s", *LastSafeLocation.ToString());
 			}
 		}
 	}
@@ -213,26 +257,8 @@ void ALavaHuangGressCharacter::RespawnAtSurface()
 		GetCharacterMovement()->Velocity = FVector::ZeroVector;
 	}
 
-	FVector TargetRespawn = LastSafeLocation;
-	ALava* LavaActor = Cast<ALava>(UGameplayStatics::GetActorOfClass(this, ALava::StaticClass()));
-
-	if (LavaActor)
-	{
-		float CurrentLavaZ = LavaActor->GetActorLocation().Z;
-		float SafetyBuffer = 150.f;
-
-		if (TargetRespawn.Z <= CurrentLavaZ + SafetyBuffer)
-		{
-			TargetRespawn.Z = CurrentLavaZ + SafetyBuffer;
-
-			// Debug
-			PRINT_LOG("Safe surface under lava");
-		}
-	}
-
-	// Debug 
-	PRINT_LOG("Respawning: %s", *TargetRespawn.ToString());
-
-	SetActorLocationAndRotation(TargetRespawn, LastSafeRotation, false, nullptr, ETeleportType::ResetPhysics);
+	// Debug
+	PRINT_LOG("Respawning: %s", *LastSafeLocation.ToString());
+	SetActorLocationAndRotation(LastSafeLocation, LastSafeRotation, false, nullptr, ETeleportType::ResetPhysics);
 }
 

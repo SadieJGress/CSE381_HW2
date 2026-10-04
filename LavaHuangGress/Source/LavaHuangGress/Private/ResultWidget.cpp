@@ -16,11 +16,11 @@ void UResultWidget::NativeConstruct()
 	}
 }
 
-void UResultWidget::SetupResult(bool bIsWin)
+void UResultWidget::SetupResult(bool IsWin)
 {
 	if (ResultText)
 	{
-		if (bIsWin)
+		if (IsWin)
 		{
 			ResultText->SetText(FText::FromString(TEXT("YOU WIN!")));
 		}

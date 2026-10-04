@@ -74,6 +74,12 @@ protected:
 	// Override begin play
 	virtual void BeginPlay() override;
 
+	// For hurt animation
+	FTimerHandle HurtTimer;
+	UPROPERTY(EditAnywhere, Category = "LavaDamage")
+	float StunDuration = .25f;
+	void ResetMovement();
+
 public:
 	// Override tick function
 	virtual void Tick(float DeltaTime) override;
@@ -116,6 +122,10 @@ public:
 	// try to reset to last recorded positionW
 	UFUNCTION(BlueprintCallable, Category = "Gameplay")
 	void RespawnAtSurface();
+
+	// If in hurt motion
+	bool IsHurt() const { return GetWorldTimerManager().IsTimerActive(HurtTimer); }
+	void LavaHurt();
 
 private:
 	// Coordinates for respawning. Vector and rotation 

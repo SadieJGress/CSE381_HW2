@@ -35,6 +35,18 @@ public:
 
 protected:
     virtual void BeginPlay() override;
+
+    // Handling the timer
+    // Call every second by time manager
+    void UpdateTimer();
+    // What happens when timer expires 
+    void OnTimerExpired();
+
+    // Initial Starting time
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LavaTimer")
+    float MaxTimer = 120.0f;
+
+
     virtual void EndPlay(const EEndPlayReason::Type Reason) override;
 
     void EndGame(bool bWon);
@@ -64,4 +76,5 @@ protected:
 
     bool bGameOver = false;
     FTimerHandle LevelTimer;
+    float RemainingTime;
 };

@@ -22,6 +22,10 @@ public:
     UFUNCTION(BlueprintPure, Category = "Lava")
     float GetRiseHeight() const;
 
+    // Drop lava amount when touched
+    UFUNCTION(BlueprintCallable, Category = "Lava")
+    void DropLavaLevel(float Amount);
+
 protected:
     virtual void BeginPlay() override;
 
@@ -44,5 +48,9 @@ protected:
 
     /** Recorded at BeginPlay so GetRiseHeight has something to measure from. */
     float StartZ = 0.f;
+
+
+    UPROPERTY(EditAnywhere, Category = "Lava")
+    float LavaDropAmount = 200.0f;
 };
 

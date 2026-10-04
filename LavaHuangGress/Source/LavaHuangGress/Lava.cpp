@@ -59,3 +59,11 @@ void ALava::HandleOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActo
 	}
 }
 
+void ALava::DropLavaLevel(float Amount)
+{
+	FVector NewLocation = GetActorLocation();
+	NewLocation.Z -= Amount;
+
+	SetActorLocation(NewLocation);
+}
+
