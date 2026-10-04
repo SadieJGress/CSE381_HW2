@@ -34,5 +34,11 @@ protected:
 
     UPROPERTY(EditAnywhere, Category = "Tuning", meta = (Units = "deg/s"))
     float SpinRate = 90.f;
+
+    UPROPERTY(EditAnywhere, Category = "Tuning")
+    float BobSpeed = 2.f;
+
+    UPROPERTY(EditAnywhere, Category = "Tuning")
+    float BobAmplitude = 20.f;
 };
 
