@@ -10,6 +10,7 @@ ALavaKey::ALavaKey()
 
 	PickupRange = CreateDefaultSubobject<USphereComponent>(TEXT("PickupRange"));
 	RootComponent = PickupRange;
+	PickupRange->setMobility(EComponentMobility::Movable);
 	PickupRange->InitSphereRadius(100.f);
 	PickupRange->SetCollisionProfileName(TEXT("OverlapAllDynamic"));
 
