@@ -2,7 +2,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "LavaHuangGressCharacter.h"
 #include "Public/ResultWidget.h"
-#include "lava.h"
+#include "Lava.h"
+#include "LavaHUD.h"
 
 #define PRINT_LOG(Format, ...) \
     do { \
@@ -17,6 +18,7 @@ ALavaGameMode::ALavaGameMode()
 {
 	PrimaryActorTick.bCanEverTick = false;
 	LivesLeft = StartingLives;
+	HUDClass = ALavaHUD::StaticClass();
 }
 
 void ALavaGameMode::BeginPlay()
@@ -42,9 +44,6 @@ void ALavaGameMode::UpdateTimer()
 
 	RemainingTime -= 1.0f;
 
-	// Print remaining time to screen via debug message
-	PRINT_LOG("Time Remaining: %.0f", RemainingTime);
-
 	if (RemainingTime <= 0.0f)
 	{
 		RemainingTime = 0.0f;
@@ -54,7 +53,6 @@ void ALavaGameMode::UpdateTimer()
 
 void ALavaGameMode::OnTimerExpired()
 {
-	PRINT_LOG("Timer expired");
 	EndGame(false);
 }
 
@@ -77,8 +75,14 @@ void ALavaGameMode::ReportLifeLost()
 	// Stop from triggering lost lives multiple times
 	if (!Player || Player->IsHurt()) {return;}
 	LivesLeft--;
-	PRINT_LOG("Lives Left: %d", LivesLeft);
 
+	if (APlayerController* PC = GetWorld()->GetFirstPlayerController())
+	{
+		if (ALavaHUD* H = Cast<ALavaHUD>(PC->GetHUD()))
+		{
+			H->TriggerDamageFlash();
+		}
+	}
 
 	// Drop lava level
 	if (ALava* LavaActor = Cast<ALava>(UGameplayStatics::GetActorOfClass(this, ALava::StaticClass())))
@@ -87,8 +91,6 @@ void ALavaGameMode::ReportLifeLost()
 	}
 	// Respawn player
 	Player->LavaHurt();
-
-
 
 	if (LivesLeft <= 0)
 	{
