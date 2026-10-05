@@ -61,11 +61,28 @@ protected:
 
 protected:
 
+	// Check last walkable surface
+	void UpdateSafeSurface();
+
 	/** Called for movement input */
 	void Move(const FInputActionValue& Value);
 
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
+
+protected:
+	// Override begin play
+	virtual void BeginPlay() override;
+
+	// For hurt animation
+	FTimerHandle HurtTimer;
+	UPROPERTY(EditAnywhere, Category = "LavaDamage")
+	float StunDuration = .25f;
+	void ResetMovement();
+
+public:
+	// Override tick function
+	virtual void Tick(float DeltaTime) override;
 
 public:
 
@@ -92,5 +109,30 @@ public:
 
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+
+// For double jumping animation
+public:
+	virtual void Jump() override;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+	UAnimMontage* DoubleJumpMontage;
+
+public:
+
+	// try to reset to last recorded positionW
+	UFUNCTION(BlueprintCallable, Category = "Gameplay")
+	void RespawnAtSurface();
+
+	// If in hurt motion
+	bool IsHurt() const { return GetWorldTimerManager().IsTimerActive(HurtTimer); }
+	void LavaHurt();
+
+private:
+	// Coordinates for respawning. Vector and rotation 
+	FVector LastSafeLocation;
+	FRotator LastSafeRotation;
 };
+
+
+
 

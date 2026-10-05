@@ -7,10 +7,24 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/Controller.h"
+#include "GameFramework/PlayerController.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "LavaHuangGress.h"
+#include "DrawDebugHelpers.h"
+#include "Lava.h"
+#include "Kismet/GameplayStatics.h"
+#include "Camera/PlayerCameraManager.h"
+
+#define PRINT_LOG(Format, ...) \
+    do { \
+        FString _msg = FString::Printf(TEXT(Format), ##__VA_ARGS__); \
+        UE_LOG(LogTemp, Warning, TEXT("%s"), *_msg); \
+        if (GEngine) { \
+            GEngine->AddOnScreenDebugMessage(-1, 4.0f, FColor::Red, _msg); \
+        } \
+    } while(0)
 
 ALavaHuangGressCharacter::ALavaHuangGressCharacter()
 {
@@ -28,9 +42,14 @@ ALavaHuangGressCharacter::ALavaHuangGressCharacter()
 
 	// Note: For faster iteration times these variables, and many more, can be tweaked in the Character Blueprint
 	// instead of recompiling to adjust them
-	GetCharacterMovement()->JumpZVelocity = 500.f;
-	GetCharacterMovement()->AirControl = 0.35f;
-	GetCharacterMovement()->MaxWalkSpeed = 500.f;
+
+	// Increasing jump amount to two
+	// Also gonna increase air control to .4
+	// Okay had to do some voodoo and reset the ThirdPersonCharacter from being connected to ACharacter into being parented by this file
+	JumpMaxCount = 2;
+	GetCharacterMovement()->JumpZVelocity = 625.f;
+	GetCharacterMovement()->AirControl = 0.4f;
+	GetCharacterMovement()->MaxWalkSpeed = 525.f;
 	GetCharacterMovement()->MinAnalogWalkSpeed = 20.f;
 	GetCharacterMovement()->BrakingDecelerationWalking = 2000.f;
 	GetCharacterMovement()->BrakingDecelerationFalling = 1500.0f;
@@ -120,6 +139,66 @@ void ALavaHuangGressCharacter::DoLook(float Yaw, float Pitch)
 	}
 }
 
+void ALavaHuangGressCharacter::LavaHurt()
+{
+	APlayerController* PC = Cast<APlayerController>(GetController());
+
+	// Freeze character
+	GetCharacterMovement()->StopMovementImmediately();
+	GetCharacterMovement()->SetMovementMode(MOVE_None);
+	GetMesh()->bPauseAnims = true;
+
+
+	// Reset after a second
+	GetWorldTimerManager().SetTimer(
+		HurtTimer,
+		this,
+		&ALavaHuangGressCharacter::ResetMovement,
+		StunDuration,
+		false
+	);
+
+	// Red camera effect
+	if (PC && PC->PlayerCameraManager)
+	{
+		PC->PlayerCameraManager->StartCameraFade(
+			0.8f, // Starting opacity
+			0.0f, // End opacity
+			0.5f, // Length
+			FLinearColor::Red, // Color
+			false,
+			false
+		);
+	}
+}
+
+void ALavaHuangGressCharacter::ResetMovement()
+{
+	// Unpause character and respawn
+	GetMesh()->bPauseAnims = false;
+
+	RespawnAtSurface();
+
+	GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+}
+
+
+void ALavaHuangGressCharacter::Jump()
+{
+	// Check if character is in air 
+	if (GetVelocity().Z != 0 || GetCharacterMovement()->IsFalling())
+	{
+		// Play animation
+		if (DoubleJumpMontage)
+		{
+			PlayAnimMontage(DoubleJumpMontage);
+		}
+	}
+
+	// Call original Jump function
+	Super::Jump();
+}
+
 void ALavaHuangGressCharacter::DoJumpStart()
 {
 	// signal the character to jump
@@ -131,3 +210,55 @@ void ALavaHuangGressCharacter::DoJumpEnd()
 	// signal the character to stop jumping
 	StopJumping();
 }
+
+void ALavaHuangGressCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
+	// Store spawn point as default safe respawn
+	LastSafeLocation = GetActorLocation();
+	LastSafeRotation = GetActorRotation();
+}
+
+void ALavaHuangGressCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	// Need to update surface now
+	UpdateSafeSurface();
+}
+
+void ALavaHuangGressCharacter::UpdateSafeSurface()
+{
+	if (GetCharacterMovement() && GetCharacterMovement()->IsMovingOnGround())
+	{
+		FHitResult HitResult = GetCharacterMovement()->CurrentFloor.HitResult;
+
+		if (HitResult.bBlockingHit && HitResult.GetActor() && !HitResult.GetActor()->IsA(ALava::StaticClass()))
+		{
+			ALava* LavaActor = Cast<ALava>(UGameplayStatics::GetActorOfClass(this, ALava::StaticClass()));
+			float LavaZ = LavaActor ? LavaActor->GetActorLocation().Z : -99999.f;
+
+			if (GetActorLocation().Z > LavaZ + 100.f)
+			{
+				LastSafeLocation = GetActorLocation();
+				LastSafeRotation = GetActorRotation();
+
+			}
+		}
+	}
+}
+
+void ALavaHuangGressCharacter::RespawnAtSurface()
+{
+	if (GetCharacterMovement())
+	{
+		GetCharacterMovement()->StopMovementImmediately();
+		GetCharacterMovement()->Velocity = FVector::ZeroVector;
+	}
+
+	// Debug
+	PRINT_LOG("Respawning: %s", *LastSafeLocation.ToString());
+	SetActorLocationAndRotation(LastSafeLocation, LastSafeRotation, false, nullptr, ETeleportType::ResetPhysics);
+}
+
