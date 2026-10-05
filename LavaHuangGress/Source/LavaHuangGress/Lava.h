@@ -22,6 +22,12 @@ public:
     UFUNCTION(BlueprintPure, Category = "Lava")
     float GetRiseHeight() const;
 
+    UFUNCTION(BlueprintPure, Category = "Lava")
+    float GetRiseRate() const { return RiseRate; }
+
+    UFUNCTION(BlueprintPure, Category = "Lava")
+    float GetBuildingHeight() const { return BuildingHeight; }
+
     // Drop lava amount when touched
     UFUNCTION(BlueprintCallable, Category = "Lava")
     void DropLavaLevel(float Amount);
@@ -46,9 +52,11 @@ protected:
     UPROPERTY(EditAnywhere, Category = "Tuning", meta = (ClampMin = "0.0", Units = "cm/s"))
     float RiseRate = 40.f;
 
+    UPROPERTY(EditAnywhere, Category = "Tuning", meta = (ClampMin = "1.0", Units = "cm"))
+    float BuildingHeight = 4900.f;
+
     /** Recorded at BeginPlay so GetRiseHeight has something to measure from. */
     float StartZ = 0.f;
-
 
     UPROPERTY(EditAnywhere, Category = "Lava")
     float LavaDropAmount = 200.0f;
