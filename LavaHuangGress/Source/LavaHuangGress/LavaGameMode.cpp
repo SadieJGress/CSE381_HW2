@@ -79,6 +79,9 @@ void ALavaGameMode::ReportLifeLost()
 	if (!Player || Player->IsHurt()) {return;}
 	LivesLeft--;
 
+	// Lower score
+	Score -= 100;
+
 	if (APlayerController* PC = GetWorld()->GetFirstPlayerController())
 	{
 		if (ALavaHUD* H = Cast<ALavaHUD>(PC->GetHUD()))
@@ -103,6 +106,8 @@ void ALavaGameMode::ReportLifeLost()
 
 void ALavaGameMode::ReportHatchReached()
 {
+	if (bGameOver) return;
+	EndGame(true);
 }
 
 float ALavaGameMode::GetTimeRemaining() const
@@ -120,6 +125,14 @@ void ALavaGameMode::EndGame(bool bWon)
 		// Stop timer
 		GetWorldTimerManager().ClearTimer(LevelTimer);
 
+
+		// Add remaining time if won
+		if (bWon)
+		{
+			int32 TimeBonus = FMath::FloorToInt(FMath::Max(0.0f, RemainingTime));
+			Score += TimeBonus;
+		}
+
 		// Show Result Screen
 		if (ResultWidgetClass)
 		{
@@ -127,7 +140,7 @@ void ALavaGameMode::EndGame(bool bWon)
 			if (ResultWidget)
 			{
 				ResultWidget->AddToViewport();
-				ResultWidget->SetupResult(bWon);
+				ResultWidget->SetupResult(bWon, Score);
 
 				APlayerController* PC = GetWorld()->GetFirstPlayerController();
 				if (PC)
