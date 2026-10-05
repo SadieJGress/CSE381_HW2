@@ -64,6 +64,9 @@ void ALavaGameMode::EndPlay(const EEndPlayReason::Type Reason)
 
 void ALavaGameMode::ReportKeyCollected()
 {
+	if (bGameOver) return;
+	KeysCollected++;
+	Score += 200;
 }
 
 void ALavaGameMode::ReportLifeLost()

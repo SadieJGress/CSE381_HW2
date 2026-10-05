@@ -40,5 +40,7 @@ protected:
 
     UPROPERTY(EditAnywhere, Category = "Tuning")
     float BobAmplitude = 20.f;
+
+    bool bCollected = false;
 };
 

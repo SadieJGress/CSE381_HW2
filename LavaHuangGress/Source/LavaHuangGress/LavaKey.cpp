@@ -41,13 +41,14 @@ void ALavaKey::Tick(float DeltaTime)
 void ALavaKey::HandleOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& Sweep)
 {
-	if (!Cast<ACharacter>(OtherActor)) 
+	if (bCollected || !Cast<ACharacter>(OtherActor)) 
 	{
 		return;
 	}
 	ALavaGameMode* GM = GetWorld()->GetAuthGameMode<ALavaGameMode>();
 	if (GM) 
 	{
+		bCollected = true;
 		GM->ReportKeyCollected();
 		Destroy();
 	}
