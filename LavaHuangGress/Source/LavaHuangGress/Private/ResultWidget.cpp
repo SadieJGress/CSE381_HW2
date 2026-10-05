@@ -16,18 +16,25 @@ void UResultWidget::NativeConstruct()
 	}
 }
 
-void UResultWidget::SetupResult(bool IsWin)
+void UResultWidget::SetupResult(bool IsWin, int32 FinScore)
 {
 	if (ResultText)
 	{
 		if (IsWin)
 		{
-			ResultText->SetText(FText::FromString(TEXT("YOU WIN!")));
+			ResultText->SetText(FText::FromString(TEXT("YOU WIN")));
+			ResultText->SetColorAndOpacity(FSlateColor(FLinearColor(0.0f, 1.0f, 0.0f, 1.0f)));
 		}
 		else
 		{
-			ResultText->SetText(FText::FromString(TEXT("GAME OVER!")));
+			ResultText->SetText(FText::FromString(TEXT("GAME OVER")));
+			ResultText->SetColorAndOpacity(FSlateColor(FLinearColor(1.0f, 0.0f, 0.0f, 1.0f)));
 		}
+	}
+
+	if (ScoreText)
+	{
+		ScoreText->SetText(FText::FromString(FString::Printf(TEXT("Score: %d"), FinScore)));
 	}
 }
 

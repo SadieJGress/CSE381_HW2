@@ -17,9 +17,12 @@ class LAVAHUANGGRESS_API UResultWidget : public UUserWidget
 protected:
 	virtual void NativeConstruct() override;
 
-	// Match to the UI elements in WBP_Result
+	// Match to the UI elements in Result
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* ResultText;
+
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* ScoreText; 
 
 	UPROPERTY(meta = (BindWidget))
 	UButton* PlayAgainButton;
@@ -30,5 +33,5 @@ protected:
 public:
 	// Need to call from lavagamemode
 	UFUNCTION(BlueprintCallable, Category = "UI")
-	void SetupResult(bool bIsWin);
+	void SetupResult(bool bIsWin, int32 FinScore);
 };

@@ -47,9 +47,9 @@ ALavaHuangGressCharacter::ALavaHuangGressCharacter()
 	// Also gonna increase air control to .4
 	// Okay had to do some voodoo and reset the ThirdPersonCharacter from being connected to ACharacter into being parented by this file
 	JumpMaxCount = 2;
-	GetCharacterMovement()->JumpZVelocity = 600.f;
+	GetCharacterMovement()->JumpZVelocity = 625.f;
 	GetCharacterMovement()->AirControl = 0.4f;
-	GetCharacterMovement()->MaxWalkSpeed = 500.f;
+	GetCharacterMovement()->MaxWalkSpeed = 525.f;
 	GetCharacterMovement()->MinAnalogWalkSpeed = 20.f;
 	GetCharacterMovement()->BrakingDecelerationWalking = 2000.f;
 	GetCharacterMovement()->BrakingDecelerationFalling = 1500.0f;
