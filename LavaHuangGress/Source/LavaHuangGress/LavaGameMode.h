@@ -89,4 +89,7 @@ protected:
     bool bGameOver = false;
     FTimerHandle LevelTimer;
     float RemainingTime;
+
+    void DebugSpeedUpLava();
+    void DebugGrantAllKeys();
 };

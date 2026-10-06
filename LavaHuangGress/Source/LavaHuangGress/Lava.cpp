@@ -36,8 +36,13 @@ void ALava::Tick(float DeltaTime)
 
 	// Rise upward over time
 	FVector NewLocation = GetActorLocation();
-	NewLocation.Z += RiseRate * DeltaTime;
+	NewLocation.Z += GetRiseRate() * DeltaTime;
 	SetActorLocation(NewLocation);
+}
+
+void ALava::ToggleDebugSpeed()
+{
+    bDebugFast = !bDebugFast;
 }
 
 float ALava::GetRiseHeight() const
