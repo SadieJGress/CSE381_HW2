@@ -4,6 +4,8 @@
 #include "Public/ResultWidget.h"
 #include "Lava.h"
 #include "LavaHUD.h"
+#include "GameFramework/PlayerController.h"
+#include "Components/InputComponent.h"
 
 #define PRINT_LOG(Format, ...) \
     do { \
@@ -35,6 +37,14 @@ void ALavaGameMode::BeginPlay()
 		1.0f,
 		true
 	);
+
+	if (APlayerController* PC = GetWorld()->GetFirstPlayerController()) {
+		EnableInput(PC);
+		if (InputComponent) {
+			InputComponent->BindKey(EKeys::L, IE_Pressed, this, &ALavaGameMode::DebugSpeedUpLava);
+			InputComponent->BindKey(EKeys::K, IE_Pressed, this, &ALavaGameMode::DebugGrantAllKeys);
+		}
+	}
 
 }
 
@@ -155,4 +165,20 @@ void ALavaGameMode::EndGame(bool bWon)
 
 void ALavaGameMode::HandleTimeExpired()
 {
+}
+
+void ALavaGameMode::DebugSpeedUpLava()
+{
+	if (ALava* LavaActor = Cast<ALava>(UGameplayStatics::GetActorOfClass(this, ALava::StaticClass())))
+	{
+		LavaActor->ToggleDebugSpeed();
+	}
+}
+
+void ALavaGameMode::DebugGrantAllKeys()
+{
+	if (bGameOver) return;
+	const int32 Missing = FMath::Max(0, KeysRequired - KeysCollected);
+	KeysCollected = KeysRequired;
+	Score += 200 * Missing;
 }
