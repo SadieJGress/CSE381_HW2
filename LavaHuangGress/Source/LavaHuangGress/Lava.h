@@ -50,7 +50,7 @@ protected:
     TObjectPtr<UBoxComponent> Volume;
 
     UPROPERTY(EditAnywhere, Category = "Tuning", meta = (ClampMin = "0.0", Units = "cm/s"))
-    float RiseRate = 40.f;
+    float RiseRate = 35.f;
 
     UPROPERTY(EditAnywhere, Category = "Tuning", meta = (ClampMin = "1.0", Units = "cm"))
     float BuildingHeight = 4900.f;
