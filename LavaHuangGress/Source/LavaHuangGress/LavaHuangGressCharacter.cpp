@@ -185,13 +185,14 @@ void ALavaHuangGressCharacter::ResetMovement()
 
 void ALavaHuangGressCharacter::Jump()
 {
-	// Check if character is in air 
-	if (GetVelocity().Z != 0 || GetCharacterMovement()->IsFalling())
-	{
-		// Play animation
-		if (DoubleJumpMontage)
+
+	if (CanJump()) {
+		// Check if character is in air 
+		if (GetCharacterMovement() && GetCharacterMovement()->IsFalling())
 		{
+			// Play animation
 			PlayAnimMontage(DoubleJumpMontage);
+
 		}
 	}
 
