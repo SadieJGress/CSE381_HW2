@@ -22,8 +22,10 @@ public:
     UFUNCTION(BlueprintPure, Category = "Lava")
     float GetRiseHeight() const;
 
+    void ToggleDebugSpeed();
+
     UFUNCTION(BlueprintPure, Category = "Lava")
-    float GetRiseRate() const { return RiseRate; }
+    float GetRiseRate() const { return RiseRate * (bDebugFast ? DebugSpeedMultiplier : 1.f); }
 
     UFUNCTION(BlueprintPure, Category = "Lava")
     float GetBuildingHeight() const { return BuildingHeight; }
@@ -31,6 +33,7 @@ public:
     // Drop lava amount when touched
     UFUNCTION(BlueprintCallable, Category = "Lava")
     void DropLavaLevel(float Amount);
+
 
 protected:
     virtual void BeginPlay() override;
@@ -48,6 +51,11 @@ protected:
     /** Sits just under the surface. This is what actually detects the player. */
     UPROPERTY(VisibleAnywhere, Category = "Components")
     TObjectPtr<UBoxComponent> Volume;
+
+    UPROPERTY(EditAnywhere, Category = "Debug", meta = (ClampMin = "1.0"))
+    float DebugSpeedMultiplier = 10.f;
+
+    bool bDebugFast = false;
 
     UPROPERTY(EditAnywhere, Category = "Tuning", meta = (ClampMin = "0.0", Units = "cm/s"))
     float RiseRate = 40.f;
