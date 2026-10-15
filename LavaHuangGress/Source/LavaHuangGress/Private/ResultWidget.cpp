@@ -4,6 +4,7 @@
 #include "Components/TextBlock.h"
 #include "Components/Button.h"
 #include "Kismet/GameplayStatics.h"
+#include "LavaGameInstance.h"
 
 void UResultWidget::NativeConstruct()
 {
@@ -48,8 +49,14 @@ void UResultWidget::OnPlayAgainClicked()
 		PC->SetInputMode(FInputModeGameOnly());
 	}
 
-	// Restart current level
-	FString CurrentLevelName = UGameplayStatics::GetCurrentLevelName(this);
-	UGameplayStatics::OpenLevel(this, FName(*CurrentLevelName));
+	// Reset the score and building index
+	if (ULavaGameInstance* GameInstance = Cast<ULavaGameInstance>(GetGameInstance()))
+	{
+		GameInstance->ResetRun();
+	}
+
+	// Restart level  
+	// FString CurrentLevelName = UGameplayStatics::GetCurrentLevelName(this);
+	UGameplayStatics::OpenLevel(this, FName("Habitat67Basic"));
 }
 

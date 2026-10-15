@@ -6,6 +6,7 @@
 #include "LavaHUD.h"
 #include "GameFramework/PlayerController.h"
 #include "Components/InputComponent.h"
+#include "LavaGameInstance.h"
 
 #define PRINT_LOG(Format, ...) \
     do { \
@@ -26,6 +27,21 @@ ALavaGameMode::ALavaGameMode()
 void ALavaGameMode::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// Figuring which level is starting level for testing purposes
+	if (ULavaGameInstance* GameInst = Cast<ULavaGameInstance>(GetGameInstance()))
+	{
+		FString CurrentMap = UGameplayStatics::GetCurrentLevelName(this);
+
+		if (CurrentMap.Contains(TEXT("StallerQuest")))
+		{
+			GameInst->BuildingIndex = 1;
+		}
+		else if (CurrentMap.Contains(TEXT("Habitat67Basic")))
+		{
+			GameInst->BuildingIndex = 0;
+		}
+	}
 
 	// Timer funciton
 	RemainingTime = MaxTimer;
@@ -117,7 +133,31 @@ void ALavaGameMode::ReportLifeLost()
 void ALavaGameMode::ReportHatchReached()
 {
 	if (bGameOver) return;
-	EndGame(true);
+
+	// Calculate final score before a transition
+	int32 TimeValue = FMath::FloorToInt(FMath::Max(0.0f, RemainingTime));
+	Score += TimeValue;
+
+	if (ULavaGameInstance* GameInstance = Cast<ULavaGameInstance>(GetGameInstance()))
+	{	
+		// Save score to total
+		GameInstance->AddScore(Score);
+
+		if (GameInstance->BuildingIndex == 0)
+		{
+			// Move to next building
+			GameInstance->BuildingIndex = 1;
+			UGameplayStatics::OpenLevel(this, FName("StallerQuest"));
+			return;
+		}
+		else
+		{
+			// Game completed
+			EndGame(true);
+		}
+
+	}
+
 }
 
 float ALavaGameMode::GetTimeRemaining() const
@@ -136,11 +176,15 @@ void ALavaGameMode::EndGame(bool bWon)
 		GetWorldTimerManager().ClearTimer(LevelTimer);
 
 
-		// Add remaining time if won
-		if (bWon)
+		// get final score for screen 
+		int32 FinalScore = Score;
+		if (ULavaGameInstance* GameInstance = Cast<ULavaGameInstance>(GetGameInstance()))
 		{
-			int32 TimeBonus = FMath::FloorToInt(FMath::Max(0.0f, RemainingTime));
-			Score += TimeBonus;
+			if (!bWon)
+			{
+				GameInstance->AddScore(Score);
+			}
+			FinalScore = GameInstance->Score;
 		}
 
 		// Show Result Screen
@@ -150,7 +194,7 @@ void ALavaGameMode::EndGame(bool bWon)
 			if (ResultWidget)
 			{
 				ResultWidget->AddToViewport();
-				ResultWidget->SetupResult(bWon, Score);
+				ResultWidget->SetupResult(bWon, FinalScore);
 
 				APlayerController* PC = GetWorld()->GetFirstPlayerController();
 				if (PC)
