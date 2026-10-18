@@ -16,6 +16,8 @@
 #include "Lava.h"
 #include "Kismet/GameplayStatics.h"
 #include "Camera/PlayerCameraManager.h"
+#include "InventoryComponent.h"
+#include "Components/InputComponent.h"
 
 #define PRINT_LOG(Format, ...) \
     do { \
@@ -65,6 +67,9 @@ ALavaHuangGressCharacter::ALavaHuangGressCharacter()
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false;
 
+	// Create inventory
+	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
+
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
 }
@@ -84,11 +89,16 @@ void ALavaHuangGressCharacter::SetupPlayerInputComponent(UInputComponent* Player
 
 		// Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ALavaHuangGressCharacter::Look);
+
+
 	}
 	else
 	{
 		UE_LOG(LogLavaHuangGress, Error, TEXT("'%s' Failed to find an Enhanced Input component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
 	}
+	// Items
+	PlayerInputComponent->BindKey(EKeys::Q, IE_Pressed, this, &ALavaHuangGressCharacter::OnSwapInput);
+	PlayerInputComponent->BindKey(EKeys::LeftMouseButton, IE_Pressed, this, &ALavaHuangGressCharacter::OnThrowInput);
 }
 
 void ALavaHuangGressCharacter::Move(const FInputActionValue& Value)
@@ -263,3 +273,21 @@ void ALavaHuangGressCharacter::RespawnAtSurface()
 	SetActorLocationAndRotation(LastSafeLocation, LastSafeRotation, false, nullptr, ETeleportType::ResetPhysics);
 }
 
+void ALavaHuangGressCharacter::OnSwapInput()
+{
+	if (InventoryComponent)
+	{
+		// Swap between 
+		CurrentlyEquippedSlot = (CurrentlyEquippedSlot == EItemSlot::Cushion) ? EItemSlot::Extinguisher : EItemSlot::Cushion;
+
+		InventoryComponent->EquipSlot(CurrentlyEquippedSlot);
+	}
+}
+
+void ALavaHuangGressCharacter::OnThrowInput()
+{
+	if (InventoryComponent)
+	{
+		InventoryComponent->ThrowEquipped();
+	}
+}
