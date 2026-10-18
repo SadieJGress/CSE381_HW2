@@ -56,7 +56,7 @@ void ALavaHUD::DrawHUD()
 		// Bunch of values
 		const float BoxW = 120.f;
 		const float BoxH = 60.f;
-		const float IconSize = 40.f;ed to 
+		const float IconSize = 40.f;
 		const float Spacing = 15.f;
 
 		const float TotalW = (BoxW * 2.f) + Spacing;
