@@ -3,6 +3,20 @@
 #include "Lava.h"
 #include "Kismet/GameplayStatics.h"
 #include "Engine/Canvas.h"
+#include "LavaHuangGresscharacter.h"
+#include "InventoryComponent.h"
+#include "Engine/Texture2D.h"
+#include "UObject/ConstructorHelpers.h"
+
+ALavaHUD::ALavaHUD()
+{
+    // Load default icons from Content/UI/ automatically
+    static ConstructorHelpers::FObjectFinder<UTexture2D> CushionTexObj(TEXT("/Game/UI/cushion"));
+    if (CushionTexObj.Succeeded()) CushionPicture = CushionTexObj.Object;
+
+    static ConstructorHelpers::FObjectFinder<UTexture2D> ExtTexObj(TEXT("/Game/UI/extinguisher"));
+    if (ExtTexObj.Succeeded()) ExtinguisherPicture = ExtTexObj.Object;
+}
 
 void ALavaHUD::DrawHUD()
 {
@@ -30,6 +44,82 @@ void ALavaHUD::DrawHUD()
 
     DrawText(FString::Printf(TEXT("%.0f m"), Roof / 100.f), FLinearColor::White, BarX - 10.f, BarY - 35.f, nullptr, 2.f);
     DrawText(FString::Printf(TEXT("%.0f m"), Rise / 100.f), FLinearColor::Red, BarX - 80.f, FillY - 10.f, nullptr, 2.f);
+
+	//Inventory
+	ALavaHuangGressCharacter* Player = Cast<ALavaHuangGressCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+	if (Player && Player->InventoryComponent)
+	{
+		const int32 Cushions = Player->InventoryComponent->GetCount(EItemSlot::Cushion);
+		const int32 Extinguishers = Player->InventoryComponent->GetCount(EItemSlot::Extinguisher);
+		const EItemSlot ActiveSlot = Player->CurrentlyEquippedSlot;
+
+		// Bunch of values
+		const float BoxW = 120.f;
+		const float BoxH = 60.f;
+		const float IconSize = 40.f;
+		const float Spacing = 15.f;
+
+		const float TotalW = (BoxW * 2.f) + Spacing;
+		const float StartX = (Canvas->SizeX - TotalW) * 0.5f;
+		const float StartY = Canvas->SizeY - BoxH - 40.f;
+
+		// Cushion Slot
+		{
+			const bool bIsActive = (ActiveSlot == EItemSlot::Cushion);
+			const float X = StartX;
+			const float Y = StartY;
+
+			// Highlight border if selected
+			if (bIsActive)
+			{
+				DrawRect(FLinearColor::Green, X - 3.f, Y - 3.f, BoxW + 6.f, BoxH + 6.f);
+			}
+
+			// Card background
+			DrawRect(FLinearColor(0.1f, 0.1f, 0.1f, 0.8f), X, Y, BoxW, BoxH);
+
+			// Draw Cushion Icon Texture
+			if (CushionPicture)
+			{
+				DrawTexture(CushionPicture, X + 10.f, Y + (BoxH - IconSize) * 0.5f, IconSize, IconSize, 0.f, 0.f, 1.f, 1.f, FLinearColor::White);
+			}
+
+			// Item count
+			DrawText(FString::Printf(TEXT("%d / 3"), Cushions), bIsActive ? FLinearColor::Green : FLinearColor::White, X + 60.f, Y + 18.f, nullptr, 1.6f);
+		}
+
+		// Extinguisher
+		{
+			const bool bIsActive = (ActiveSlot == EItemSlot::Extinguisher);
+			const float X = StartX + BoxW + Spacing;
+			const float Y = StartY;
+
+			if (bIsActive)
+			{
+				DrawRect(FLinearColor::Green, X - 3.f, Y - 3.f, BoxW + 6.f, BoxH + 6.f);
+			}
+
+			DrawRect(FLinearColor(0.1f, 0.1f, 0.1f, 0.8f), X, Y, BoxW, BoxH);
+
+			if (ExtinguisherPicture)
+			{
+				DrawTexture(ExtinguisherPicture, X + 10.f, Y + (BoxH - IconSize) * 0.5f, IconSize, IconSize, 0.f, 0.f, 1.f, 1.f, FLinearColor::White);
+			}
+
+			DrawText(FString::Printf(TEXT("%d / 2"), Extinguishers), bIsActive ? FLinearColor::Green : FLinearColor::White, X + 60.f, Y + 18.f, nullptr, 1.6f);
+		}
+
+		// Crosshair
+		if (ActiveSlot == EItemSlot::Extinguisher)
+		{
+			const float CenterX = Canvas->SizeX * 0.5f;
+			const float CenterY = Canvas->SizeY * 0.5f;
+			const float CrosshairSize = 12.f;
+
+			DrawLine(CenterX - CrosshairSize, CenterY, CenterX + CrosshairSize, CenterY, FLinearColor::Green, 2.f);
+			DrawLine(CenterX, CenterY - CrosshairSize, CenterX, CenterY + CrosshairSize, FLinearColor::Green, 2.f);
+		}
+	}
 
     if (FlashAlpha > 0.f)
     {

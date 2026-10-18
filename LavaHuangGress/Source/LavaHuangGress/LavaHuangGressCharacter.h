@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
+#include "InventoryComponent.h"
 #include "LavaHuangGressCharacter.generated.h"
 
 class USpringArmComponent;
@@ -49,15 +50,31 @@ protected:
 	UPROPERTY(EditAnywhere, Category="Input")
 	UInputAction* MouseLookAction;
 
+
 public:
 
 	/** Constructor */
 	ALavaHuangGressCharacter();	
 
+	// Inventory component  
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
+	TObjectPtr<UInventoryComponent> InventoryComponent;
+
+	// Inventory swapping
+	UPROPERTY(EditAnywhere, Category = "Inventory")
+	EItemSlot CurrentlyEquippedSlot = EItemSlot::Cushion;
+
+	// Inputs for swapping and throwing items
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	void OnSwapInput();
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	void OnThrowInput();
+
 protected:
 
 	/** Initialize input action bindings */
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
 
 protected:
 
@@ -79,6 +96,8 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "LavaDamage")
 	float StunDuration = .25f;
 	void ResetMovement();
+
+
 
 public:
 	// Override tick function

@@ -5,6 +5,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/Character.h"
 #include "LavaHuangGressCharacter.h"
+#include "Throwable.h"
 
 ALava::ALava()
 {
@@ -62,6 +63,14 @@ void ALava::HandleOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActo
 			GameMode->ReportLifeLost();
 		}
 	}
+
+	// Destroy throwables
+	if (AThrowable* Throwable = Cast<AThrowable>(OtherActor))
+	{
+		Throwable->Destroy();
+
+	}
+
 }
 
 void ALava::DropLavaLevel(float Amount)
