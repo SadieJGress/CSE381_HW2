@@ -11,10 +11,10 @@
 ALavaHUD::ALavaHUD()
 {
     // Load default icons from Content/UI/ automatically
-    static ConstructorHelpers::FObjectFinder<UTexture2D> CushionTexObj(TEXT("/Game/UI/cushion"));
+    static ConstructorHelpers::FObjectFinder<UTexture2D> CushionTexObj(TEXT("/Game/UI/Pillow_icon"));
     if (CushionTexObj.Succeeded()) CushionPicture = CushionTexObj.Object;
 
-    static ConstructorHelpers::FObjectFinder<UTexture2D> ExtTexObj(TEXT("/Game/UI/extinguisher"));
+    static ConstructorHelpers::FObjectFinder<UTexture2D> ExtTexObj(TEXT("/Game/UI/ext_icon"));
     if (ExtTexObj.Succeeded()) ExtinguisherPicture = ExtTexObj.Object;
 }
 
