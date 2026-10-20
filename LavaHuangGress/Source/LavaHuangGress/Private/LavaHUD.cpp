@@ -3,7 +3,7 @@
 #include "Lava.h"
 #include "Kismet/GameplayStatics.h"
 #include "Engine/Canvas.h"
-#include "LavaHuangGresscharacter.h"
+#include "LavaHuangGressCharacter.h"
 #include "InventoryComponent.h"
 #include "Engine/Texture2D.h"
 #include "UObject/ConstructorHelpers.h"
