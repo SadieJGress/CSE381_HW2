@@ -55,6 +55,9 @@ public:
     UFUNCTION(BlueprintPure, Category = "Inventory")
     EItemSlot GetEquippedSlot() const { return EquippedSlot; }
 
+    UFUNCTION(BlueprintCallable, Category = "Inventory")
+    void RefillAllSlots();
+
 protected:
     /** Destroy whatever is in the hand and attach one of the newly equipped item. */
     void RefreshHeldActor();

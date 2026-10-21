@@ -99,6 +99,7 @@ void ALavaHuangGressCharacter::SetupPlayerInputComponent(UInputComponent* Player
 	// Items
 	PlayerInputComponent->BindKey(EKeys::Q, IE_Pressed, this, &ALavaHuangGressCharacter::OnSwapInput);
 	PlayerInputComponent->BindKey(EKeys::LeftMouseButton, IE_Pressed, this, &ALavaHuangGressCharacter::OnThrowInput);
+	PlayerInputComponent->BindKey(EKeys::I, IE_Pressed, this, &ALavaHuangGressCharacter::DebugRefillInventory);
 }
 
 void ALavaHuangGressCharacter::Move(const FInputActionValue& Value)
@@ -289,5 +290,13 @@ void ALavaHuangGressCharacter::OnThrowInput()
 	if (InventoryComponent)
 	{
 		InventoryComponent->ThrowEquipped();
+	}
+}
+
+void ALavaHuangGressCharacter::DebugRefillInventory()
+{
+	if (InventoryComponent)
+	{
+		InventoryComponent->RefillAllSlots();
 	}
 }
