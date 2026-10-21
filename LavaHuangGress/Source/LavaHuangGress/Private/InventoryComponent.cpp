@@ -123,3 +123,12 @@ void UInventoryComponent::ThrowEquipped()
 	// Respawn next item
 	RefreshHeldActor();
 }
+
+void UInventoryComponent::RefillAllSlots()
+{
+	for (auto& Pair : Slots)
+	{
+		Pair.Value.Count = Pair.Value.Capacity;
+	}
+	RefreshHeldActor();
+}

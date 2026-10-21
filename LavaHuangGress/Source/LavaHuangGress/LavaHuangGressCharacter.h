@@ -146,6 +146,10 @@ public:
 	bool IsHurt() const { return GetWorldTimerManager().IsTimerActive(HurtTimer); }
 	void LavaHurt();
 
+	// Debug
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	void DebugRefillInventory();
+
 private:
 	// Coordinates for respawning. Vector and rotation 
 	FVector LastSafeLocation;

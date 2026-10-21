@@ -92,4 +92,6 @@ protected:
 
     void DebugSpeedUpLava();
     void DebugGrantAllKeys();
+    UFUNCTION()
+    void DebugJumpToLevel2();
 };

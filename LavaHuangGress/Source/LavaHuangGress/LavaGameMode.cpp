@@ -59,6 +59,7 @@ void ALavaGameMode::BeginPlay()
 		if (InputComponent) {
 			InputComponent->BindKey(EKeys::L, IE_Pressed, this, &ALavaGameMode::DebugSpeedUpLava);
 			InputComponent->BindKey(EKeys::K, IE_Pressed, this, &ALavaGameMode::DebugGrantAllKeys);
+			InputComponent->BindKey(EKeys::J, IE_Pressed, this, &ALavaGameMode::DebugJumpToLevel2);
 		}
 	}
 
@@ -225,4 +226,14 @@ void ALavaGameMode::DebugGrantAllKeys()
 	const int32 Missing = FMath::Max(0, KeysRequired - KeysCollected);
 	KeysCollected = KeysRequired;
 	Score += 200 * Missing;
+}
+
+void ALavaGameMode::DebugJumpToLevel2()
+{
+	if (ULavaGameInstance* GameInstance = Cast<ULavaGameInstance>(GetGameInstance()))
+	{
+		GameInstance->Score = 750;
+		GameInstance->BuildingIndex = 1;
+		UGameplayStatics::OpenLevel(this, FName("StallerQuest"));
+	}
 }
