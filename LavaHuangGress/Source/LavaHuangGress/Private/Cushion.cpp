@@ -61,7 +61,7 @@ void ACushion::Land(float SurfaceZ)
 void ACushion::Throw(const FVector& Direction)
 {
     Super::Throw(Direction);
-    SetActorRotation(FRotator(0.f, GetActorLocation().Yaw, 0.f));
+    SetActorRotation(FRotator(0.f, GetActorRotation().Yaw, 0.f));
     GetWorldTimerManager().SetTimer(LavaCheckTimer, this, &ACushion::CheckLava, 0.02f, true);
 }
 
